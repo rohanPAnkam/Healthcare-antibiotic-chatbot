@@ -1,69 +1,75 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import Navbar from "@/components/navbar"
-import { motion } from "framer-motion"
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Navbar from "@/components/navbar";
+import { motion } from "framer-motion";
+import { auth } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 export default function SignupPage() {
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+    e.preventDefault();
+    setLoading(true);
 
     try {
-      // This is where you would call Firebase createUserWithEmailAndPassword
-      // const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-      // Then update the user profile with the name
-      // await updateProfile(userCredential.user, { displayName: name })
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
 
-      console.log("Signing up with:", name, email, password)
+      await updateProfile(user, { displayName: name });
 
-      // Simulate successful signup
-      setTimeout(() => {
-        router.push("/")
-      }, 1000)
-    } catch (error) {
-      console.error("Signup error:", error)
-      alert("Failed to sign up. Please try again.")
+      console.log("User signed up:", user);
+      router.push("/");
+    } catch (error: any) {
+      console.error("Signup error:", error.message);
+      alert(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleGoogleSignup = async () => {
-    setLoading(true)
+    setLoading(true);
 
     try {
-      // This is where you would call Firebase signInWithPopup with GoogleAuthProvider
-      // const provider = new GoogleAuthProvider()
-      // const result = await signInWithPopup(auth, provider)
-      console.log("Signing up with Google")
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
 
-      // Simulate successful signup
-      setTimeout(() => {
-        router.push("/")
-      }, 1000)
-    } catch (error) {
-      console.error("Google signup error:", error)
-      alert("Failed to sign up with Google.")
+      console.log("Google signup successful:", result.user);
+      router.push("/");
+    } catch (error: any) {
+      console.error("Google signup error:", error.message);
+      alert(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <>
@@ -76,11 +82,11 @@ export default function SignupPage() {
             transition={{ duration: 0.5 }}
             className="relative w-full max-w-md aspect-square"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/80 to-purple-600/80 rounded-2xl blur-3xl opacity-20"></div>
+            <div className="absolute inset-0 bg-blue-600 rounded-2xl blur-3xl opacity-20"></div>
             <div className="relative h-full w-full flex items-center justify-center">
               <div className="text-center space-y-6">
                 <div className="inline-block p-3 rounded-full bg-primary/10">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="32"
@@ -99,9 +105,12 @@ export default function SignupPage() {
                     </svg>
                   </div>
                 </div>
-                <h2 className="text-3xl font-bold tracking-tight">Join AI ChatBot Today</h2>
+                <h2 className="text-3xl font-bold tracking-tight">
+                  Join AI ChatBot Today
+                </h2>
                 <p className="text-muted-foreground max-w-sm mx-auto">
-                  Create an account and start chatting with our AI assistant. Get answers to your questions instantly.
+                  Create an account and start chatting with our AI assistant.
+                  Get answers to your questions instantly.
                 </p>
                 <div className="pt-4 flex flex-col space-y-2">
                   <div className="flex items-center space-x-2">
@@ -156,7 +165,9 @@ export default function SignupPage() {
                       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                       <polyline points="22 4 12 14.01 9 11.01" />
                     </svg>
-                    <span className="text-sm">Secure and private conversations</span>
+                    <span className="text-sm">
+                      Secure and private conversations
+                    </span>
                   </div>
                 </div>
               </div>
@@ -172,8 +183,12 @@ export default function SignupPage() {
           >
             <Card className="border-primary/10 shadow-xl bg-card/95 backdrop-blur-sm">
               <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl font-bold text-center">Create an account</CardTitle>
-                <CardDescription className="text-center">Enter your information to get started</CardDescription>
+                <CardTitle className="text-2xl font-bold text-center">
+                  Create an account
+                </CardTitle>
+                <CardDescription className="text-center">
+                  Enter your information to get started
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <form onSubmit={handleSignup} className="space-y-4">
@@ -210,11 +225,13 @@ export default function SignupPage() {
                       required
                       className="border-primary/20 focus-visible:ring-primary/30"
                     />
-                    <p className="text-xs text-muted-foreground">Password must be at least 6 characters long</p>
+                    <p className="text-xs text-muted-foreground">
+                      Password must be at least 6 characters long
+                    </p>
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-white"
+                    className="w-full bg-blue-600  hover:bg-blue-700 text-white"
                     disabled={loading}
                   >
                     {loading ? "Creating account..." : "Sign up"}
@@ -234,7 +251,12 @@ export default function SignupPage() {
                   onClick={handleGoogleSignup}
                   disabled={loading}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" width="20">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    width="20"
+                  >
                     <path
                       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                       fill="#4285F4"
@@ -259,7 +281,10 @@ export default function SignupPage() {
               <CardFooter className="flex justify-center">
                 <p className="text-sm text-muted-foreground">
                   Already have an account?{" "}
-                  <Link href="/login" className="text-primary hover:underline font-medium">
+                  <Link
+                    href="/login"
+                    className="text-primary hover:underline font-medium"
+                  >
                     Login
                   </Link>
                 </p>
@@ -269,6 +294,5 @@ export default function SignupPage() {
         </div>
       </div>
     </>
-  )
+  );
 }
-
