@@ -1,22 +1,4 @@
-// import { initializeApp } from "firebase/app";
-// import { getAuth, GoogleAuthProvider } from "firebase/auth";
-
-// // Your Firebase configuration object from the Firebase Console
-// const firebaseConfig = {
-//   apiKey: "AIzaSyBFknmazzYGEUhzxOfrVbC8l8QrdCRaKlc",
-//   authDomain: "vitachat-a7463.firebaseapp.com",
-//   projectId: "vitachat-a7463",
-//   storageBucket: "vitachat-a7463.firebasestorage.app",
-//   messagingSenderId: "641235233241",
-//   appId: "1:641235233241:web:9ccbc3a770c0b65a9351c8"
-// };
-
-// // Initialize Firebase
-// const app = initializeApp(firebaseConfig);
-
-// // Initialize Firebase Authentication and get a reference to the service
-// export const auth = getAuth(app);
-// export const googleProvider = new GoogleAuthProvider();
+import { getFirestore } from "firebase/firestore"
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
@@ -36,3 +18,4 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase Authentication and get a reference to the service
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
+export const db = getFirestore(app);

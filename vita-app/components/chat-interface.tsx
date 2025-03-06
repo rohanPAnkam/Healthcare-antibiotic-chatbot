@@ -1,6 +1,5 @@
 "use client";
 
-import type React from "react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +8,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import Navbar from "./navbar";
 import { motion, AnimatePresence } from "framer-motion";
 import ThinkingAnimation from "./thinking-animation";
+import { auth, db } from "../lib/firebase";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { collection, addDoc } from "firebase/firestore";
 
 interface Message {
   id: string;
   content: string;
-  role: "user" | "assistant"; // Match handleSend roles
+  role: "user" | "assistant";
   timestamp: Date;
 }
 
@@ -22,76 +24,34 @@ export default function ChatInterface() {
     {
       id: "1",
       content: "Hello! How can I help you today?",
-      role: "assistant", // Changed from "bot" to "assistant"
+      role: "assistant",
       timestamp: new Date(),
     },
   ]);
   const [input, setInput] = useState("");
   const [isThinking, setIsThinking] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
+  // Only track user authentication state, no Firestore fetch
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
   useEffect(() => {
     scrollToBottom();
-  }, [messages, scrollToBottom]); // Added messages dependency
-
-  // const handleSend = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!input.trim()) return;
-
-  //   const userMessage: Message = {
-  //     id: Date.now().toString(),
-  //     content: input,
-  //     role: "user",
-  //     timestamp: new Date(),
-  //   };
-
-  //   setMessages((prev) => [...prev, userMessage]);
-  //   setInput("");
-  //   setIsThinking(true);
-
-  //   try {
-  //     const response = await fetch("http://localhost:3005/process", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ text: input }),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`Failed with status: ${response.status}`);
-  //     }
-
-  //     const data = await response.json();
-  //     console.log("Received from backend:", data);
-
-  //     const botMessage: Message = {
-  //       id: (Date.now() + 1).toString(),
-  //       content: data.modifiedText,
-  //       role: "assistant",
-  //       timestamp: new Date(),
-  //     };
-
-  //     setMessages((prev) => [...prev, botMessage]);
-  //   } catch (error) {
-  //     console.error("Error sending message:", error);
-  //     const errorMessage: Message = {
-  //       id: (Date.now() + 1).toString(),
-  //       content: "Sorry, something went wrong. Please try again.",
-  //       role: "assistant",
-  //       timestamp: new Date(),
-  //     };
-  //     setMessages((prev) => [...prev, errorMessage]);
-  //   } finally {
-  //     setIsThinking(false);
-  //   }
-  // };
+  }, [messages, scrollToBottom]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || !user) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -105,7 +65,6 @@ export default function ChatInterface() {
     setIsThinking(true);
 
     try {
-      // Step 1: Send the user message to your current backend
       const response = await fetch("http://localhost:3005/process", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -117,8 +76,6 @@ export default function ChatInterface() {
       }
 
       const data = await response.json();
-      console.log("Received from backend:", data);
-
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: data.modifiedText,
@@ -128,6 +85,22 @@ export default function ChatInterface() {
 
       setMessages((prev) => [...prev, botMessage]);
 
+      // Save to Firestore
+      await addDoc(collection(db, "chatHistory"), {
+        userId: user.uid,
+        content: userMessage.content,
+        role: userMessage.role,
+        timestamp: userMessage.timestamp,
+      });
+
+      await addDoc(collection(db, "chatHistory"), {
+        userId: user.uid,
+        content: botMessage.content,
+        role: botMessage.role,
+        timestamp: botMessage.timestamp,
+      });
+
+      // Optional: Save to Frappe backend
       const payload = {
         table_uwpq: [
           {
@@ -136,8 +109,6 @@ export default function ChatInterface() {
           },
         ],
       };
-      console.log("Payload being sent:", JSON.stringify(payload, null, 2));
-      // Step 2: Send the chat data to Frappe backend
       const frappeResponse = await fetch(
         "http://localhost:8000/api/resource/ChatHistory",
         {
@@ -151,34 +122,23 @@ export default function ChatInterface() {
       );
 
       if (!frappeResponse.ok) {
-        // throw new Error(`Failed to save chat log: ${frappeResponse.status}`);
+        console.error(`Failed to save to Frappe: ${frappeResponse.status}`);
       }
-
-      const frappeData = await frappeResponse.json();
-      console.log("Chat log saved to Frappe:", frappeData);
     } catch (error) {
       console.error("Error:", error);
-      // const errorMessage: Message = {
-      //   id: (Date.now() + 1).toString(),
-      //   content: "Sorry, something went wrong. Please try again.",
-      //   role: "assistant",
-      //   timestamp: new Date(),
-      // };
-      // setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsThinking(false);
     }
   };
 
   return (
-    // <div className="flex flex-col h-screen bg-gradient-to-b from-background to-background/95">
     <div className="flex flex-col h-screen bg-[url('https://img.freepik.com/free-vector/network-mesh-wire-digital-technology-background_1017-27428.jpg?t=st=1740811759~exp=1740815359~hmac=d587e951c6410f56f1d15105b9db2bf4836ba397ffbed3ed6e645c5e769f1e39&w=2000')] bg-cover bg-center bg-no-repeat">
       <Navbar />
       <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
         <AnimatePresence initial={false}>
           {messages.map((message) => (
             <motion.div
-              key={message.id} // Changed from index to message.id
+              key={message.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -222,8 +182,6 @@ export default function ChatInterface() {
                     className="p-3"
                     style={{ whiteSpace: "pre-wrap" }}
                   >
-                    {" "}
-                    {/* Added whiteSpace */}
                     {message.content}
                   </CardContent>
                 </Card>
@@ -267,8 +225,8 @@ export default function ChatInterface() {
           />
           <Button
             type="submit"
-            className="bg-blue-600  hover:bg-blue-700 text-white"
-            disabled={!input.trim() || isThinking}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+            disabled={!input.trim() || isThinking || !user}
           >
             <motion.svg
               xmlns="http://www.w3.org/2000/svg"

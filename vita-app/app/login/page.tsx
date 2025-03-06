@@ -105,7 +105,7 @@ export default function LoginPage() {
                   </div>
                 </div>
                 <h2 className="text-3xl font-bold tracking-tight">
-                  Welcome to AI ChatBot
+                  Welcome to VitaChat
                 </h2>
                 <p className="text-muted-foreground max-w-sm mx-auto">
                   Experience the power of AI with our intelligent chatbot. Get
@@ -130,9 +130,7 @@ export default function LoginPage() {
                       </svg>
                     ))}
                   </div>
-                  <p className="mt-2 text-sm font-medium">
-                    Trusted by thousands of users
-                  </p>
+                  <p className="mt-2 text-sm font-medium">Trusted by coders</p>
                 </div>
               </div>
             </div>

@@ -106,7 +106,7 @@ export default function SignupPage() {
                   </div>
                 </div>
                 <h2 className="text-3xl font-bold tracking-tight">
-                  Join AI ChatBot Today
+                  Join VitaChat Today
                 </h2>
                 <p className="text-muted-foreground max-w-sm mx-auto">
                   Create an account and start chatting with our AI assistant.

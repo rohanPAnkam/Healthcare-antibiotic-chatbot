@@ -3,38 +3,29 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { auth } from "../lib/firebase"; // Adjust the import path to your Firebase config
-import { onAuthStateChanged, signOut, User } from "firebase/auth"; // Import User type from Firebase
+import { auth } from "../lib/firebase";
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 // Custom hook to manage auth state with Firebase
 const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null); // Use Firebase User type
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up Firebase auth state listener
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // Set user if logged in, null if logged out
-      setLoading(false); // Loading is done once auth state is determined
+      setUser(currentUser);
+      setLoading(false);
     });
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth); // Firebase signOut method
-      setUser(null); // Clear user state (optional, onAuthStateChanged will handle it)
+      await signOut(auth);
+      setUser(null);
     } catch (error) {
       console.error("Error signing out:", error);
     }
@@ -49,7 +40,7 @@ export default function Navbar() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/"); // Redirect to home page after logout
+    router.push("/");
   };
 
   return (
@@ -82,12 +73,44 @@ export default function Navbar() {
           {loading ? (
             <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
           ) : user ? (
-            // Show Logout button when user is signed in
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.3 }}
+              className="flex items-center gap-3"
             >
+              {/* Display user's name */}
+              {/* Display user's name with icon */}
+              <div className="flex items-center gap-2 ">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-black" // Changed to white for high contrast
+                >
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                <Link
+                  className="text-black hover:text-blue-300" // White text with hover effect
+                  href="/profile"
+                >
+                  {(user.displayName || user.email?.split("@")[0] || "User")
+                    .charAt(0)
+                    .toUpperCase() +
+                    (
+                      user.displayName ||
+                      user.email?.split("@")[0] ||
+                      "User"
+                    ).slice(1)}
+                </Link>
+              </div>
               <Button
                 variant="ghost"
                 onClick={handleSignOut}
@@ -113,7 +136,6 @@ export default function Navbar() {
               </Button>
             </motion.div>
           ) : (
-            // Show Login and Sign Up buttons when user is not signed in
             <>
               <motion.div
                 initial={{ y: -10, opacity: 0 }}
