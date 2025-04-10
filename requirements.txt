@@ -3,3 +3,8 @@ langchain
 chromadb
 pytest
 boto3
+langchain_chroma
+langchain_community
+langchain_huggingface
+sentence-transformers
+pdf2image
