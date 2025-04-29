@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,7 +9,7 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
-import { auth } from "@/lib/firebase"; // Import Firebase auth
+import { auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +24,7 @@ import {
 } from "@/components/ui/card";
 import Navbar from "@/components/navbar";
 import { motion } from "framer-motion";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -43,11 +43,11 @@ export default function LoginPage() {
         password
       );
       console.log("User logged in:", userCredential.user);
-
+      toast.success("Successfully logged in!");
       router.push("/");
     } catch (error: any) {
       console.error("Login error:", error.message);
-      alert(error.message);
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -60,11 +60,11 @@ export default function LoginPage() {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       console.log("Google login successful:", result.user);
-
+      toast.success("Logged in with Google!");
       router.push("/");
     } catch (error: any) {
       console.error("Google login error:", error.message);
-      alert(error.message);
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -72,6 +72,7 @@ export default function LoginPage() {
 
   return (
     <>
+      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <Navbar />
       <div className="flex min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background via-background/95 to-background/90">
         <div className="hidden lg:flex w-1/2 bg-gradient-to-br from-primary/5 to-purple-600/5 items-center justify-center p-12">
@@ -187,7 +188,7 @@ export default function LoginPage() {
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-blue-600  hover:bg-blue-700 text-white"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                     disabled={loading}
                   >
                     {loading ? "Logging in..." : "Login"}
@@ -214,7 +215,7 @@ export default function LoginPage() {
                     width="20"
                   >
                     <path
-                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                      d="M22.56 12.25c0-.78-.07-1.53-.20-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                       fill="#4285F4"
                     />
                     <path
@@ -252,164 +253,3 @@ export default function LoginPage() {
     </>
   );
 }
-
-// "use client";
-
-// import type React from "react";
-// import { useState } from "react";
-// import Link from "next/link";
-// import { useRouter } from "next/navigation";
-// import {
-//   signInWithEmailAndPassword,
-//   signInWithPopup,
-//   GoogleAuthProvider,
-// } from "firebase/auth";
-// import { auth } from "@/lib/firebase"; // Import Firebase auth
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Separator } from "@/components/ui/separator";
-// import {
-//   Card,
-//   CardContent,
-//   CardDescription,
-//   CardFooter,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card";
-// import Navbar from "@/components/navbar";
-// import { motion } from "framer-motion";
-
-// export default function LoginPage() {
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-//   const [loading, setLoading] = useState(false);
-//   const router = useRouter();
-
-//   const handleEmailLogin = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     try {
-//       const userCredential = await signInWithEmailAndPassword(
-//         auth,
-//         email,
-//         password
-//       );
-//       console.log("User logged in:", userCredential.user);
-
-//       router.push("/");
-//     } catch (error: any) {
-//       console.error("Login error:", error.message);
-//       alert(error.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleGoogleLogin = async () => {
-//     setLoading(true);
-
-//     try {
-//       const provider = new GoogleAuthProvider();
-//       const result = await signInWithPopup(auth, provider);
-//       console.log("Google login successful:", result.user);
-
-//       router.push("/");
-//     } catch (error: any) {
-//       console.error("Google login error:", error.message);
-//       alert(error.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <>
-//       <Navbar />
-//       <div className="flex min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background via-background/95 to-background/90">
-//         <div className="w-full lg:w-1/2 flex items-center justify-center p-4">
-//           <motion.div
-//             initial={{ opacity: 0, y: 20 }}
-//             animate={{ opacity: 1, y: 0 }}
-//             transition={{ duration: 0.5 }}
-//             className="w-full max-w-md"
-//           >
-//             <Card className="border-primary/10 shadow-xl bg-card/95 backdrop-blur-sm">
-//               <CardHeader className="space-y-1">
-//                 <CardTitle className="text-2xl font-bold text-center">
-//                   Welcome back
-//                 </CardTitle>
-//                 <CardDescription className="text-center">
-//                   Login to your account to continue
-//                 </CardDescription>
-//               </CardHeader>
-//               <CardContent className="space-y-4">
-//                 <form onSubmit={handleEmailLogin} className="space-y-4">
-//                   <div className="space-y-2">
-//                     <Label htmlFor="email">Email</Label>
-//                     <Input
-//                       id="email"
-//                       type="email"
-//                       placeholder="name@example.com"
-//                       value={email}
-//                       onChange={(e) => setEmail(e.target.value)}
-//                       required
-//                     />
-//                   </div>
-//                   <div className="space-y-2">
-//                     <div className="flex items-center justify-between">
-//                       <Label htmlFor="password">Password</Label>
-//                       <Link
-//                         href="/forgot-password"
-//                         className="text-sm text-primary hover:underline"
-//                       >
-//                         Forgot password?
-//                       </Link>
-//                     </div>
-//                     <Input
-//                       id="password"
-//                       type="password"
-//                       value={password}
-//                       onChange={(e) => setPassword(e.target.value)}
-//                       required
-//                     />
-//                   </div>
-//                   <Button type="submit" className="w-full" disabled={loading}>
-//                     {loading ? "Logging in..." : "Login"}
-//                   </Button>
-//                 </form>
-
-//                 <div className="flex items-center">
-//                   <Separator className="flex-1" />
-//                   <span className="mx-2 text-xs text-muted-foreground">OR</span>
-//                   <Separator className="flex-1" />
-//                 </div>
-
-//                 <Button
-//                   variant="outline"
-//                   className="w-full flex items-center justify-center"
-//                   onClick={handleGoogleLogin}
-//                   disabled={loading}
-//                 >
-//                   Continue with Google
-//                 </Button>
-//               </CardContent>
-//               <CardFooter className="flex justify-center">
-//                 <p className="text-sm text-muted-foreground">
-//                   Don't have an account?{" "}
-//                   <Link
-//                     href="/signup"
-//                     className="text-primary hover:underline font-medium"
-//                   >
-//                     Sign up
-//                   </Link>
-//                 </p>
-//               </CardFooter>
-//             </Card>
-//           </motion.div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// }
